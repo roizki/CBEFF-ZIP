@@ -68,7 +68,7 @@ class CBEFFPayload:
             zipf.write("bdb.enc")
             zipf.write("sb.txt")
         return output_zip
-
+  
     def generate(self):
         ciphertext = self.encrypt_payload()
         digest = self.sha256_digest(ciphertext)
@@ -83,3 +83,4 @@ if __name__ == "__main__":
     generator = CBEFFPayload()
     output = generator.generate()
     print(f"Payload ZIP created: {output}")
+ 
