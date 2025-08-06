@@ -18,7 +18,7 @@ class CBEFFPayload:
             data = {
                 "biometric": {
                     "fingerprint": "template123",
-                    "roi": "roiScannedData",
+                    "roilan": "roiScannedData",
                     "face": "faceTemplate"
                 },
                 "biographic": {
@@ -106,7 +106,7 @@ class CBEFFPayload:
 
         timestamp = datetime.utcnow().isoformat() + "Z"
         sbh = f"""CBEFF_VERSION: ISO-19785-3
-OWNER: Roilan Belaro Lab
+OWNER: Roilan Belaro
 FORMAT_TYPE: JSON+ZIP
 TIMESTAMP: {timestamp}
 IV: {self.iv.hex()}"""
@@ -121,4 +121,4 @@ PAYLOAD_DIGEST_SHA256: {digest.hex()}"""
 if __name__ == "__main__":
     generator = CBEFFPayload()
     output = generator.generate()
-    print(f"✅ Final CBEFF Payload ZIP created: {output}")
+    print(f"Final CBEFF Payload ZIP created: {output}")

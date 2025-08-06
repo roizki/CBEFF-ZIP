@@ -7,3 +7,4 @@ biometric:
   face: faceTemplate
   fingerprint: template123
   roi: roiScannedData
+  
