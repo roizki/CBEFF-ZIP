@@ -9,8 +9,7 @@ class CBEFFPayload:
     def __init__(self, yaml_path="bio_data.yaml"):
         self.yaml_path = yaml_path
         self.load_data()
-        self.private_key = ECC.generate(curve='P-256')
-        self.peer_public_key = ECC.generate(curve='P-256').public_key()
+        self.load_keys()
         self.key = self.derive_aes_key_from_ecc()
         self.iv = os.urandom(16)
 
@@ -37,26 +36,31 @@ class CBEFFPayload:
         self.biometric = data["biometric"]
         self.biographic = data["biographic"]
 
+    def load_keys(self):
+        # Load ECC private key
+        self.private_key = ECC.import_key(open("my_private_key.pem").read())
+
+        # Load ECC peer public key
+        self.peer_public_key = ECC.import_key(open("my_public_key.pem").read())
+
     def derive_aes_key_from_ecc(self):
         shared_point = self.private_key.d * self.peer_public_key.pointQ
         shared_secret = int(shared_point.x).to_bytes(32, 'big')
         return SHA256.new(shared_secret).digest()
 
     def encrypt_payload(self):
-        # Serialize data
         data = json.dumps({
             "biometric": self.biometric,
             "biographic": self.biographic
         }).encode()
 
-        # In-memory ZIP creation
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as zipf:
             zipf.writestr("data.json", data)
+
         zip_bytes = zip_buffer.getvalue()
         padded = pad(zip_bytes, AES.block_size)
 
-        # Encrypt
         cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
         return cipher.encrypt(padded)
 
@@ -82,7 +86,6 @@ class CBEFFPayload:
         ciphertext = self.encrypt_payload()
         digest = self.sha256_digest(ciphertext)
 
-        # SBH — Security Block Header with details
         timestamp = datetime.utcnow().isoformat() + "Z"
         sbh = f"""CBEFF_VERSION: ISO-19785-3
 OWNER: Roilan Belaro Lab
@@ -90,16 +93,14 @@ FORMAT_TYPE: JSON+ZIP
 TIMESTAMP: {timestamp}
 IV: {self.iv.hex()}"""
 
-        # SB — Security Block
         sb = f"""SECURITY_LEVEL: HIGH
 PAYLOAD_DIGEST_SHA256: {digest.hex()}"""
 
         self.create_payload_files(sbh, ciphertext, sb)
-        zip_path = self.package_zip()
-        return zip_path
+        return self.package_zip()
 
 # ==== Usage ====
 if __name__ == "__main__":
     generator = CBEFFPayload()
     output = generator.generate()
-    print(f" Final CBEFF Payload ZIP created: {output}")
+    print(f"Final CBEFF Payload ZIP created: {output}")
