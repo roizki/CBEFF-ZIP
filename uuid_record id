@@ -1,0 +1,29 @@
+import hashlib
+import uuid
+
+record_id = str(uuid.uuid4())
+print("Record ID:", record_id)
+
+h = hashlib.sha256()
+h.update(record_id.encode())
+id_hash = h.hexdigest()
+print("Hash of record ID:", id_hash)
+
+user_input = record_id  
+h = hashlib.sha256()
+h.update(user_input.encode())
+input_hash = h.hexdigest()
+
+#print("Hashes match:", input_hash == id_hash) 
+
+
+#import hashlib
+#import uuid
+
+#record_id = str(uuid.uuid4())
+#print("Record id:", record_id)
+
+#h = hashlib.sha256()
+#h.update(record_id.encode())
+#print("hash of record_id:", id_hash)
+

@@ -1,0 +1,23 @@
+from pathlib import Path
+import hashlib 
+
+file_path = Path(r'C:\Users\User\OneDrive\Dokumen\myfile.txt')
+# record_id = hashlib.sha256(str(file_path).encode()).hexdigest()
+# print("Record ID (from path):", record_id)
+
+h = hashlib.new("SHA256")
+#record_id = 'f036c0aac52c58069c4802d9ddfb903cfff4a692df6cd007bdb15dc1cbb44f37'
+#h.update(record_id.encode())
+
+id_hash = h.hexdigest()
+print(id_hash)
+
+
+
+user_invalue = 'f036c0aac52c58069c4802d9ddfb903cfff4a692df6cd007bdb15dc1cbb44f37'
+h=hashlib.new('SHA256')
+h.update(user_invalue.encode())
+input_hash = h.hexdigest()
+
+print(input_hash == id_hash)
+

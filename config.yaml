@@ -1,0 +1,12 @@
+allowed_units:
+  - REG-UNIT-001
+  - REG-UNIT-002
+  - REG-UNIT-003
+
+allowed_drift_minutes: 5
+
+session_key: "00112233445566778899aabbccddeeff"  # Hexadecimal string (16 bytes)
+aes_iv: "0102030405060708090a0b0c0d0e0f10"        # IV in hex (16 bytes)
+
+rx_public_key_path: "my_public.pem"
+tx_private_key_path: "my_private.pem"

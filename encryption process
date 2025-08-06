@@ -1,0 +1,27 @@
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import binascii
+import os
+
+# Your derived AES-256 key in hex form
+aes_key = binascii.unhexlify('b56c5cf1bd6f8f4e6e5e2171029dcf06e0196480f053f7694cac23258d39cbcc')
+
+#  Hashed record ID
+id_hash = '61efd8f121c9378b66e238a44b991148cd28291b94a6d41e000b326dd965de25'
+data_to_encrypt = id_hash.encode()
+
+# Generate secure IV for AES-GCM (12 bytes is standard)
+iv = os.urandom(12)
+
+# AES-GCM Encryptor setup
+encryptor = Cipher(
+    algorithms.AES(aes_key),
+    modes.GCM(iv)
+).encryptor()
+
+ciphertext = encryptor.update(data_to_encrypt) + encryptor.finalize()
+tag = encryptor.tag
+
+#  Output the raw encrypted values
+print("Ciphertext:", ciphertext)
+print("IV:", iv)
+print("Auth Tag:", tag)

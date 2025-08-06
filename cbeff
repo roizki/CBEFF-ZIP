@@ -1,0 +1,73 @@
+import json, zipfile, os, hashlib, struct
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+from Crypto.PublicKey import ECC
+from Crypto.Hash import SHA256
+
+
+def derive_aes_key_from_ecc(private_key, peer_public_key):
+    shared_point = private_key.d * peer_public_key.pointQ
+    shared_secret = int(shared_point.x).to_bytes(32, 'big')  # ✅ FIXED
+    return SHA256.new(shared_secret).digest()  # AES-256 key
+
+
+def encrypt_payload(biometric, biographic, key, iv):
+    # Create zipped JSON of biographic and biometric data
+    data = json.dumps({"biometric": biometric, "biographic": biographic}).encode()
+    with zipfile.ZipFile("payload.zip", "w") as zipf:
+        zipf.writestr("data.json", data)
+    with open("payload.zip", "rb") as f:
+        raw = f.read()
+    padded = pad(raw, AES.block_size)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    return cipher.encrypt(padded)
+
+def sha256_digest(data):
+    return hashlib.sha256(data).digest()  # use raw digest (not hex) for binary BIR
+
+def create_cbeff_bir(sbh, bdb, sb, output_file="bir.cbeff"):
+    with open(output_file, "wb") as f:
+        # SBH
+        sbh_bytes = sbh.encode()
+        f.write(struct.pack(">I", len(sbh_bytes)))
+        f.write(sbh_bytes)
+
+        # BDB (ciphertext)
+        f.write(struct.pack(">I", len(bdb)))
+        f.write(bdb)
+
+        # SB (digest + level info)
+        sb_bytes = sb.encode()
+        f.write(struct.pack(">I", len(sb_bytes)))
+        f.write(sb_bytes)
+
+    print(f"CBEFF BIR written to: {output_file}")
+
+# Simulated Data
+bio = {
+    "fingerprint": "template123",
+    "roi": "roiScannedData",
+    "face": "faceTemplate"
+}
+info = {
+    "name": "Roilan Belaro",
+    "dob": "2004-10-14",
+    "datatype": "national id",
+    "nationality": "PH"
+}
+
+private_key = ECC.generate(curve='P-256')
+peer_public_key = ECC.generate(curve='P-256').public_key()
+key = derive_aes_key_from_ecc(private_key, peer_public_key)
+
+ # AES-256
+iv = os.urandom(16)   # 16-byte IV
+
+# Encrypt & Digest
+ciphertext = encrypt_payload(bio, info, key, iv)
+digest = sha256_digest(ciphertext)
+sbh = "ISOHeader2020"
+sb = "Level:High;" + digest.hex()  # append hex digest to SB
+
+# Build CBEFF BIR binary file
+create_cbeff_bir(sbh, ciphertext, sb)

@@ -1,0 +1,23 @@
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import binascii
+
+# AES key (same one used during encryption)
+aes_key = binascii.unhexlify('b56c5cf1bd6f8f4e6e5e2171029dcf06e0196480f053f7694cac23258d39cbcc')
+
+# 🧷 IV, Auth Tag, and Ciphertext from encryption (make sure they're in bytes)
+iv = b'V\x89r\x92\x95-\xa8!\x15\xe3@U'
+tag = b'\t\x06\r\xb6\xb0?\nw\xac^w\x0c\xfah\xddx'
+ciphertext = b'\x87\xab\xb1=\x96\xb1\x0e7\xf1#\xa5>\xaf\xadg<\xf2\x967)\x13e`M!\xd1\xb8\x08\x92\xd8\xd0q\x82\xc5T\xac\x03\xe4%O\x07x2AD&2\xf0>*wl\t2.0\xca\xd8.jm\x1cl\xd1'
+#  Set up decryptor
+decryptor = Cipher(
+    algorithms.AES(aes_key),
+    modes.GCM(iv, tag)
+).decryptor()
+
+#  Decrypt and recover the data
+decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+
+#  Decode to get original hash string
+original_hash = decrypted_data.decode()
+
+print(" Recovered Hash:", original_hash)

@@ -1,0 +1,11 @@
+import requests
+
+# The old URL (will redirect)
+url = "http://localhost:5000/old-biometric-endpoint"
+
+# Follow redirection automatically
+response = requests.get(url)
+
+print(f"Status Code: {response.status_code}")
+print("Final URL after redirection:", response.url)
+print("Response Body:\n", response.text)

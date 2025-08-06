@@ -1,0 +1,6 @@
+from pathlib import Path
+import hashlib
+
+file_path = Path(r'C:\Users\User\OneDrive\Dokumen\myfile.txt')
+record_id = hashlib.sha256(str(file_path).encode()).hexdigest()
+print("Record ID (from path):", record_id)

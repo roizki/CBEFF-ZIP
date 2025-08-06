@@ -1,0 +1,29 @@
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+import os
+
+with open("my_private_key.pem", "rb") as private_file:
+    private_key = serialization.load_pem_private_key(
+        private_file.read(),
+        password=None 
+    )
+
+with open("my_public_key.pem", "rb") as public_file:
+    public_key = serialization.load_pem_public_key(public_file.read())
+
+shared_secret = private_key.exchange(ec.ECDH(), public_key)
+#salt = b"record-id-salt"
+
+salt = os.urandom(16) 
+print("Salt:", salt.hex())
+
+
+aes_key = HKDF(
+    algorithm=hashes.SHA256(), 
+    length=32,                  
+    salt=salt,                
+    info=b"record-id-encryption" 
+).derive(shared_secret)
+
+print(f" Your AES key: {aes_key.hex()}")

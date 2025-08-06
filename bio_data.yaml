@@ -1,0 +1,9 @@
+biographic:
+  datatype: national id
+  dob: '2004-10-14'
+  name: Roilan Belaro
+  nationality: PH
+biometric:
+  face: faceTemplate
+  fingerprint: template123
+  roi: roiScannedData

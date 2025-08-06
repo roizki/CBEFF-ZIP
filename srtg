@@ -1,0 +1,32 @@
+from pathlib import Path
+from hashlib import sha256
+from Crypto.Cipher import AES
+import base64
+from Crypto.Random import get_random_bytes
+
+#  Your derived AES key here (32 bytes = 256-bit)
+derived_key = b'\x01\x23...'  # Replace with your actual key in bytes
+
+#  Generate Record ID from file path
+file_path = Path(r'C:\Users\User\OneDrive\Dokumen\myfile.txt')
+record_id = sha256(str(file_path).encode()).hexdigest()
+
+#  Hash the Record ID again
+hashed_id = sha256(record_id.encode()).digest()
+
+#  Encrypt with AES-GCM using your key
+iv = get_random_bytes(12)
+cipher = AES.new(derived_key, AES.MODE_GCM, nonce=iv)
+ciphertext, tag = cipher.encrypt_and_digest(hashed_id)
+
+#  Encode components for DB-friendly storage
+encrypted_payload = {
+    "ciphertext": base64.b64encode(ciphertext).decode(),
+    "iv": base64.b64encode(iv).decode(),
+    "tag": base64.b64encode(tag).decode()
+}
+
+#  View Output
+print("\n Stored Values:")
+for key, val in encrypted_payload.items():
+    print(f"{key}: {val}")
