@@ -56,8 +56,26 @@ class CBEFFPayload:
 
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as zipf:
+            # Add JSON data
             zipf.writestr("data.json", data)
 
+            # === INCLUDE FACE IMAGE ===
+            face_path = "face.jpg"  # Update this if your image is .jpg
+            if os.path.exists(face_path):
+                with open(face_path, "rb") as facef:
+                    zipf.writestr("face_image.png", facef.read())
+            else:
+                print(f"⚠️ Face image not found: {face_path}")
+
+            # === INCLUDE FINGERPRINT IMAGE ===
+            finger_path = "finger.jpg"
+            if os.path.exists(finger_path):
+                with open(finger_path, "rb") as fingerf:
+                    zipf.writestr("finger_image.jpg", fingerf.read())
+            else:
+                print(f"⚠️ Fingerprint image not found: {finger_path}")
+
+        # Encrypt the final ZIP
         zip_bytes = zip_buffer.getvalue()
         padded = pad(zip_bytes, AES.block_size)
 
@@ -103,4 +121,4 @@ PAYLOAD_DIGEST_SHA256: {digest.hex()}"""
 if __name__ == "__main__":
     generator = CBEFFPayload()
     output = generator.generate()
-    print(f"Final CBEFF Payload ZIP created: {output}")
+    print(f"✅ Final CBEFF Payload ZIP created: {output}")
