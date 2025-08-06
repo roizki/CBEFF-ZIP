@@ -1,4 +1,5 @@
-import json, zipfile, os, hashlib, struct, yaml
+import json, zipfile, os, hashlib, yaml, io
+from datetime import datetime
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from Crypto.PublicKey import ECC
@@ -42,12 +43,20 @@ class CBEFFPayload:
         return SHA256.new(shared_secret).digest()
 
     def encrypt_payload(self):
-        data = json.dumps({"biometric": self.biometric, "biographic": self.biographic}).encode()
-        with zipfile.ZipFile("payload.zip", "w") as zipf:
+        # Serialize data
+        data = json.dumps({
+            "biometric": self.biometric,
+            "biographic": self.biographic
+        }).encode()
+
+        # In-memory ZIP creation
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zipf:
             zipf.writestr("data.json", data)
-        with open("payload.zip", "rb") as f:
-            raw = f.read()
-        padded = pad(raw, AES.block_size)
+        zip_bytes = zip_buffer.getvalue()
+        padded = pad(zip_bytes, AES.block_size)
+
+        # Encrypt
         cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
         return cipher.encrypt(padded)
 
@@ -68,19 +77,29 @@ class CBEFFPayload:
             zipf.write("bdb.enc")
             zipf.write("sb.txt")
         return output_zip
-  
+
     def generate(self):
         ciphertext = self.encrypt_payload()
         digest = self.sha256_digest(ciphertext)
-        sbh = "ISOHeader2020"
-        sb = "Level:High;" + digest.hex()
+
+        # SBH — Security Block Header with details
+        timestamp = datetime.utcnow().isoformat() + "Z"
+        sbh = f"""CBEFF_VERSION: ISO-19785-3
+OWNER: Roilan Belaro Lab
+FORMAT_TYPE: JSON+ZIP
+TIMESTAMP: {timestamp}
+IV: {self.iv.hex()}"""
+
+        # SB — Security Block
+        sb = f"""SECURITY_LEVEL: HIGH
+PAYLOAD_DIGEST_SHA256: {digest.hex()}"""
+
         self.create_payload_files(sbh, ciphertext, sb)
         zip_path = self.package_zip()
         return zip_path
 
-# Usage
+# ==== Usage ====
 if __name__ == "__main__":
     generator = CBEFFPayload()
     output = generator.generate()
-    print(f"Payload ZIP created: {output}")
- 
+    print(f" Final CBEFF Payload ZIP created: {output}")
