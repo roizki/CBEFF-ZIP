@@ -1,4 +1,4 @@
-# CBEFF-ZIP Payload Generator
+# CBEFF-ZIP Payload 
 
 This repository contains code for generating CBEFF-compliant biometric payloads. The generator combines biometric and biographic data, encrypts them using ECC-derived AES-256 keys, and packages the result into a ZIP file with CBEFF metadata blocks.
 
