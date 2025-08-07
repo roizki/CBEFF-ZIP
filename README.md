@@ -7,7 +7,7 @@ This repository contains code for generating CBEFF-compliant biometric payloads.
 ### Prerequisites
 
 Make sure you have the following installed:
-- **Python 3.10+**
+- **Python 3.13.5**
 - **PyCryptodome** (`pip install pycryptodome`)
 - **PyYAML** (`pip install pyyaml`)
 
@@ -100,7 +100,7 @@ rm sbh.txt sb.txt bdb.enc payload_cbeff.zip
 
 ## Built With
 
-* [Python 3.10](https://www.python.org/)
+* [Python 3.13.5](https://www.python.org/)
 * [PyCryptodome](https://www.pycryptodome.org/)
 * [PyYAML](https://pyyaml.org/)
 
