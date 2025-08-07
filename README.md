@@ -106,7 +106,7 @@ rm sbh.txt sb.txt bdb.enc payload_cbeff.zip
 
 ## Authors
 
-Roilan Belaro - _Initial work_
+Roilan Belaro - _Initial work_  https://github.com/roizki
 
 ## License
 
