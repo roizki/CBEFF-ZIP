@@ -124,4 +124,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Acknowledgements
 
-- Based on the CBEFF ISO-19785
+- Based on the CBEFF ISO-19785-3 standard.
